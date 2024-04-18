@@ -535,10 +535,10 @@ app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {
 
                 // Create a new CompletedAssignments entry
                 pool.query(`
-                    INSERT INTO CompletedAssignments (student_id, assignment_id, correctness_percentage)
-                    VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE correctness_percentage = VALUES(correctness_percentage)`,
-                    [student_id, assignment_id, correctnessPercentage]);
+                INSERT INTO CompletedAssignments (student_id, assignment_id, correctness_percentage)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE correctness_percentage = VALUES(correctness_percentage), completion_date = CURRENT_TIMESTAMP`,
+                [student_id, assignment_id, correctnessPercentage]);
 
                 // Redirect the student to the classroom homepage
                 res.redirect(`/student/classroom/${invite_code}`);
@@ -678,7 +678,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                     }
 
                     req.session.qa_pairs = questions.data.qa_pairs; // Save the questions in the session TODO
-                    res.redirect('/answer');
+                    res.redirect('/Teacher/classroom/:invite_code/assignment/:id');
                 } catch (error) {
                     console.error('Error sending request to question_generator.py:', error.message);
                     res.status(500).send('An error occurred while generating the questions.');
