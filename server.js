@@ -658,4 +658,4 @@ app.post('/answer', async (req, res) => {
 
 // Start the server
 var PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${port}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
