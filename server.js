@@ -264,6 +264,78 @@ app.get('/Teacher/classroom/:invite_code', (req, res) => {
     });
 });
 
+// Route for Teacher Assignment Overview Page
+app.get('/Teacher/classroom/:invite_code/assignment/:id', (req, res) => {
+    const invite_code = req.params.invite_code;
+    const assignment_id = req.params.id;
+    const teacher_id = req.session.userId;
+
+    // Check if the user is the teacher of the classroom
+    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], (error, classrooms) => {
+        if (error) {
+            console.error(error);
+            res.status(500).send('An error occurred while trying to fetch the classroom data.');
+            return;
+        }
+
+        if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
+            const classroom_id = classrooms[0].id;
+
+            // Check if the assignment belongs to the classroom
+            pool.query('SELECT * FROM Assignment WHERE id = ? AND classroom_id = ?', [assignment_id, classroom_id], (error, assignments) => {
+                if (error) {
+                    console.error(error);
+                    res.status(500).send('An error occurred while trying to fetch the assignment data.');
+                    return;
+                }
+
+                if (assignments.length > 0) {
+                    // Fetch the students in the classroom
+                    pool.query('SELECT Student.* FROM Student JOIN ClassroomStudent ON Student.id = ClassroomStudent.student_id WHERE ClassroomStudent.classroom_id = ?', [classroom_id], (error, students) => {
+                        if (error) {
+                            console.error(error);
+                            res.status(500).send('An error occurred while trying to fetch the students data.');
+                            return;
+                        }
+
+                        // Fetch the student responses for the assignment
+                        pool.query('SELECT StudentResponse.* FROM StudentResponse WHERE assignment_id = ?', [assignment_id], (error, responses) => {
+                            if (error) {
+                                console.error(error);
+                                res.status(500).send('An error occurred while trying to fetch the student responses data.');
+                                return;
+                            }
+
+                            // Fetch the completed assignments for the assignment
+                            pool.query('SELECT CompletedAssignments.* FROM CompletedAssignments WHERE assignment_id = ?', [assignment_id], (error, completedAssignments) => {
+                                if (error) {
+                                    console.error(error);
+                                    res.status(500).send('An error occurred while trying to fetch the completed assignments data.');
+                                    return;
+                                }
+
+                                // Render the assignment overview page with the assignment, students, responses, and completed assignments data
+                                res.render('teacher_assignment_overview', { assignment: assignments[0], students, responses, completedAssignments });
+                            });
+                        });
+                    });
+                } else {
+                    // The assignment does not belong to the classroom, redirect to the teacher homepage
+                    req.flash('error', 'The assignment does not belong to this classroom.');
+                    res.redirect('/Teacher/homepage');
+                }
+            });
+        } else {
+            // The user is not the teacher of the classroom, redirect to the teacher homepage
+            req.flash('error', 'You are not the teacher of this classroom.');
+            res.redirect('/Teacher/homepage');
+        }
+    });
+});
+
+
+
+
 
 
 

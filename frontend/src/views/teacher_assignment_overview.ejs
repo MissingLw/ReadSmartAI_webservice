@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= assignment.name %> - Student Results</title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+    <h1><%= assignment.name %> - Student Results</h1>
+    <button onclick="location.href='/Teacher/classroom/<%= assignment.classroom_id %>'">Back to Classroom</button>
+    <div class="student-container">
+        <% students.forEach(student => { %>
+            <div class="student">
+                <h2><%= student.name %>:</h2>
+                <% let response = responses.find(response => response.student_id === student.id); %>
+                <% if (response) { %>
+                    <p>Percentage Correct: <%= response.correctness_percentage %> "Date Completed:" <%= response.completion_date %></p>
+                <% } else { %>
+                    <p>Not Taken Yet</p>
+                <% } %>
+            </div>
+        <% }); %>
+    </div>
+</body>
+</html>
