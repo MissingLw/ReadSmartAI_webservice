@@ -10,8 +10,8 @@ const flash = require('connect-flash');
 app.use(flash());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true })); // Add this line to parse URL-encoded bodies
-app.use(express.static(path.join(__dirname, '../../frontend/src'))); // Serve static files
-app.set('views', path.join(__dirname, '../../frontend/src/views')); // Set views directory
+app.use(express.static(path.join(__dirname, './frontend/src'))); // Serve static files
+app.set('views', path.join(__dirname, './frontend/src/views')); // Set views directory
 app.set('view engine', 'ejs');
 
 app.use(session({
