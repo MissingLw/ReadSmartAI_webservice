@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Teacher Homepage</title>
+    <style>
+        .classrooms {
+            height: 200px;
+            overflow-y: scroll;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, <%= user.name %>!</h1>
+    <button onclick="location.href='/classroom/join'">TODO Join a Classroom</button>
+    <button onclick="location.href='/Teacher/Classroom/Create'">Create a Classroom</button>
+    <h2>Select Classroom</h2>
+    <div class="classrooms">
+        <% classrooms.forEach(function(classroom) { %>
+            <p><a href="/Teacher/classroom/<%= classroom.invite_code %>"><%= classroom.name %></a></p>
+        <% }); %>
+    </div>
+</body>
+</html>

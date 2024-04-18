@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= classroom.name %></title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+    <h1><%= classroom.name %></h1>
+    <h2>Teacher: <%= teacher.name %></h2>
+
+    <h3>Assignments To Complete:</h3>
+    <ul>
+        <% notCompleted.forEach((assignment) => { %>
+            <li>
+                <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>">
+                    <%= assignment.name %>
+                </a>
+            </li>
+        <% }); %>
+    </ul>
+
+    <h3>Completed Assignments:</h3>
+    <ul>
+        <% completed.forEach((assignment) => { %>
+            <li>
+                <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/feedback">
+                    <%= assignment.name %>
+                </a>
+            </li>
+        <% }); %>
+    </ul>
+</body>
+</html>

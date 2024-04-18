@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><%= classroom.name %></title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+    <script>
+        function createAssignment() {
+            window.location.href = "/Teacher/classroom/<%= classroom.invite_code %>/assignment_create";
+        }
+    </script>
+</head>
+<body>
+    <h1><%= classroom.name %></h1>
+    <h2>Teacher: <%= teacher.name %> | Invite Code: <%= classroom.invite_code %></h2>
+
+    <div class="container">
+        <div class="box-container">
+            <h3>Assignments</h3>
+            <div class="box">
+                <% assignments.forEach(assignment => { %>
+                    <p>Assignment <%= assignment.name %></p>
+                <% }); %>
+            </div>
+        </div>
+
+        <div class="box-container">
+            <h3>Students in class</h3>
+            <div class="box">
+                <% students.forEach(student => { %>
+                    <p><%= student.name %></p>
+                <% }); %>
+            </div>
+        </div>
+    </div>
+
+    <button onclick="createAssignment()">Create an Assignment</button>
+</body>
+</html>

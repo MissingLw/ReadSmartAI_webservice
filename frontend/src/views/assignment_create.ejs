@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Question Generator</title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+    <style>
+        .add-source-button {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Question Generator</h1>
+    <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
+        <div>
+            <label for="assignment-name">Assignment Name:</label>
+            <input type="text" id="assignment-name" name="assignment-name" required>
+        </div>
+        <div>
+            <label for="text-source">Text Source:</label>
+            <select id="text-source" name="text-source">
+                <option value="tell_tale_heart">The Tell Tale Heart</option>
+                <option value="most_dangerous_game">The Most Dangerous Game</option>
+                <option value="lamb_to_the_slaughter">Lamb To The Slaughter</option>
+                <option value="daedalus_and_icarus">Daedalus and Icarus</option>
+            </select>
+        </div>
+        <div>
+            <label for="question-count">Number of Questions:</label>
+            <input type="number" id="question-count" name="question-count" min="1" max="5">
+        </div>
+        <input type="submit" value="Submit">
+    </form>
+    <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
+</body>
+</html>

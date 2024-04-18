@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Join Classroom</title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+    <h1>Join Classroom</h1>
+    <form action="/student/classroom/join" method="POST">
+        <div>
+            <label for="invite-code">Classroom Code:</label>
+            <input type="text" id="invite-code" name="invite-code" required pattern=".{7,7}" title="7 characters required">
+        </div>
+        <input type="submit" value="Join">
+    </form>
+</body>
+</html>

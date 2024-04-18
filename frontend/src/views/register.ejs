@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create An Account</title>
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+<body>
+    <h1 class="centered-title">Account Creation</h1>
+    <div class="centered-form">
+        <form id="registerForm" action="/login/register" method="post">
+            <label for="accountType">Account Type:</label><br>
+            <select id="accountType" name="accountType" required>
+                <option value="">Select...</option>
+                <option value="teacher">Teacher</option>
+                <option value="student">Student</option>
+            </select><br>
+            <label for="name">Name:</label><br>
+            <input type="text" id="name" name="name" required><br>
+            <label for="email">Email:</label><br>
+            <input type="email" id="email" name="email" required><br>
+            <label for="password">Password:</label><br>
+            <input type="password" id="password" name="password" required><br>
+            <label for="confirmPassword">Confirm Password:</label><br>
+            <input type="password" id="confirmPassword" name="confirmPassword" required><br>
+            <input type="submit" value="Create Account">
+        </form>
+    </div>
+    <script src="../components/Register/Register.js"></script>
+</body>
+</html>
