@@ -503,7 +503,7 @@ app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {
         });
 
         // Send a POST request to the grading microservice
-        axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/response_grader/generate', { qa_pairs, student_responses })
+        axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/response_grader/grade', { qa_pairs, student_responses })
             .then(async response => {
                 const feedbackList = response.data.feedback;
 
