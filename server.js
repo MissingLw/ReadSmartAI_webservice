@@ -431,7 +431,7 @@ app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {
         });
 
         // Send a POST request to the grading microservice
-        axios.post('http://localhost:5000/response_grader/grade', { qa_pairs, student_responses })
+        axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/response_grader/generate', { qa_pairs, student_responses })
             .then(async response => {
                 const feedbackList = response.data.feedback;
 
@@ -593,7 +593,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 
                 // Send a request to the question_generator.py microservice
                 try {
-                    const questions = await axios.post('http://localhost:5000/question_generator/generate', req.body);
+                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
                     console.log('Received questions from question_generator.py:', questions.data);
 
                     // Insert each question into the Question table
