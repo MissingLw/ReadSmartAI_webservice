@@ -18,7 +18,7 @@
             <h3>Assignments</h3>
             <div class="box">
                 <% assignments.forEach(assignment => { %>
-                    <p>Assignment <%= assignment.name %></p>
+                    <p><a href="/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>">Assignment <%= assignment.name %></a></p>
                 <% }); %>
             </div>
         </div>
