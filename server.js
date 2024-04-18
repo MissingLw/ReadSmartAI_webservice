@@ -401,7 +401,6 @@ app.post('/student/classroom/join', (req, res) => {
 
 // student_classroom_homepage.ejs
 // Route for Student Classroom Homepage
-// Route for Student Classroom Homepage
 app.get('/student/classroom/:invite_code', (req, res) => {
     const invite_code = req.params.invite_code;
     const student_id = req.session.userId;
@@ -677,8 +676,8 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                         });
                     }
 
-                    req.session.qa_pairs = questions.data.qa_pairs; // Save the questions in the session TODO
-                    res.redirect('/Teacher/classroom/:invite_code/assignment/:id');
+
+                    res.redirect(`/Teacher/classroom/${invite_code}/assignment/${result.insertId}`);
                 } catch (error) {
                     console.error('Error sending request to question_generator.py:', error.message);
                     res.status(500).send('An error occurred while generating the questions.');
@@ -690,39 +689,6 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
         }
     });
 });
-
-// Route for answer screen
-app.get('/answer', (req, res) => {
-    console.log('Received GET request at /answer');
-    res.render('answer', { qa_pairs: req.session.qa_pairs }); // Pass the questions to the answer.ejs file
-});
-
-// New route handler for /qa_pairs
-app.get('/qa_pairs', (req, res) => {
-    console.log('Received GET request at /qa_pairs');
-    res.json(req.session.qa_pairs);
-});
-
-app.post('/answer', async (req, res) => {
-    console.log('Received POST request at /answer with body:', req.body);
-    // Send a request to the response_grader.py microservice
-    try {
-        const feedback = await axios.post('http://localhost:5000/response_grader/grade', {
-            qa_pairs: req.session.qa_pairs,
-            student_responses: req.body.answers.reduce((obj, answer, i) => {
-                obj[`Question ${i + 1}`] = answer;
-                return obj;
-            }, {}),
-        });
-        console.log('Received feedback from response_grader.py:', feedback.data);
-        // Return the feedback as a JSON object
-        res.json({ feedback: feedback.data.feedback });
-    } catch (error) {
-        console.error('Error sending request to response_grader.py:', error.message);
-        res.status(500).send('An error occurred while grading the answers.');
-    }
-});
-
 
 
 
