@@ -334,10 +334,10 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id', (req, res) => {
 });
 
 // Route for Teacher to view Student Assignment Feedback Page
-app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student_name', (req, res) => {
+app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student_id', (req, res) => {
     const invite_code = req.params.invite_code;
     const assignment_id = req.params.id;
-    const student_name = req.params.student_name;
+    const student_id = req.params.student_id; // Use student_id instead of student_name
     const teacher_id = req.session.userId;
 
     // Check if the teacher and assignment belong to the classroom
@@ -354,15 +354,15 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student
                 const classroom = results[0];
                 const assignment = results[0];
 
-                // Fetch the student's id
+                // Fetch the student's data
                 pool.query(`
-                    SELECT id 
+                    SELECT * 
                     FROM Student 
-                    WHERE name = ?`, 
-                    [student_name], 
-                    (error, results) => {
+                    WHERE id = ?`, 
+                    [student_id], 
+                    (error, studentResults) => {
                         if (error) throw error;
-                        const student_id = results[0].id;
+                        const student = studentResults[0];
 
                         // Fetch the questions, student responses, and feedback for the assignment
                         pool.query(`
@@ -370,7 +370,7 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student
                             FROM Question 
                             JOIN StudentResponse ON Question.id = StudentResponse.question_id 
                             WHERE Question.assignment_id = ? AND StudentResponse.student_id = ?`, 
-                            [assignment_id, student_id], 
+                            [assignment_id, student.id], 
                             (error, questions) => {
                                 if (error) throw error;
 
@@ -379,13 +379,13 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student
                                     SELECT correctness_percentage 
                                     FROM CompletedAssignments 
                                     WHERE student_id = ? AND assignment_id = ?`, 
-                                    [student_id, assignment_id], 
+                                    [student.id, assignment_id], 
                                     (error, results) => {
                                         if (error) throw error;
                                         const correctnessPercentage = results[0].correctness_percentage;
 
-                                        // Render the assignment feedback page with the assignment, questions, and correctness percentage data
-                                        res.render('teacher_student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage });
+                                        // Render the assignment feedback page with the assignment, questions, correctness percentage, and student data
+                                        res.render('teacher_student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage, student });
                                     }
                                 );
                             }
