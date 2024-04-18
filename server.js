@@ -315,7 +315,7 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id', (req, res) => {
                                 }
 
                                 // Render the assignment overview page with the assignment, students, responses, and completed assignments data
-                                res.render('teacher_assignment_overview', { assignment: assignments[0], students, responses, completedAssignments });
+                                res.render('teacher_assignment_overview', { classroom: classrooms[0], assignment: assignments[0], students, responses, completedAssignments });
                             });
                         });
                     });
