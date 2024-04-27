@@ -811,7 +811,8 @@ app.post('/Teacher/text_sources/upload', (req, res, next) => {
     const file = req.file;
 
     if (!file) {
-        return res.status(400).send('No file was uploaded.');
+        req.flash('error', 'File is too large! Maximum size is 50MB');
+        return res.redirect('/Teacher/text_sources/upload');
     }
 
     const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf', 'text/plain'];
