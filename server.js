@@ -7,7 +7,6 @@ const pool = require('./db-connector');
 const session = require('express-session');
 const flash = require('connect-flash');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
 
@@ -27,7 +26,13 @@ app.use(session({
 
 const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
-
+// Set up multer to store files in disk storage with a file size limit
+const upload = multer({
+    dest: 'uploads/',
+    limits: {
+        fileSize: 50 * 1024 * 1024 // 50MB
+    }
+});
 
 // LOG IN ROUTES AND HANDLERS
 
@@ -758,7 +763,6 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
     });
 });
 
-// Route for viewing teachers text sources TODO
 // Route for viewing teachers text sources
 app.get('/Teacher/text_sources/', (req, res) => {
     const teacher_id = req.session.userId;
@@ -793,13 +797,25 @@ app.get('/Teacher/text_sources/upload', (req, res) => {
 });
 
 // Post Request for uploading text sources
-app.post('/Teacher/text_sources/upload', upload.single('file'), async (req, res) => {
+app.post('/Teacher/text_sources/upload', (req, res, next) => {
+    upload.single('file')(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                req.fileValidationError = 'File size is too large. Maximum size is 50MB.';
+            }
+        }
+        next();
+    });
+}, async (req, res) => {
     const teacher_id = req.session.userId;
     const file = req.file;
 
     const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf', 'text/plain'];
     if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).send('Invalid file type. Only .doc, .docx, .pdf, and .txt files are allowed.');
+    }
+    if (req.fileValidationError) {
+        return res.status(400).send(req.fileValidationError);
     }
 
     pool.query('INSERT INTO TextSource (teacher_id, name) VALUES (?, ?)', [teacher_id, file.originalname], async (error, result) => {
@@ -826,6 +842,10 @@ app.post('/Teacher/text_sources/upload', upload.single('file'), async (req, res)
     });
 });
 
+// Route for calculating the tokens of a file/section of a file
+app.get('/Teacher/text_sources/token_calculator', (req, res) => { 
+    res.render('token_calculator');
+});
 
 // Start the server
 var PORT = process.env.PORT || 3000;

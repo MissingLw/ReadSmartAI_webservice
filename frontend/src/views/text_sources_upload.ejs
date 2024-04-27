@@ -5,6 +5,9 @@
 </head>
 <body>
     <h1>Upload Text Source for <%= teacher.name %></h1>
+    <h2>Files Must be 50mb or under and a .doc, .docx, .pdf, or .txt</h2>
+    <h3>File must be under XXXX Tokens, click the token calculator for more information</h3>
+    <button onclick="location.href='/Teacher/text_sources/token_calculator'">Token Calculator</button>
     <form id="uploadForm" action="/Teacher/text_sources/upload" method="post" enctype="multipart/form-data">
         <label for="file">Choose a file:</label>
         <input type="file" id="file" name="file" accept=".doc,.docx,.pdf,.txt">
