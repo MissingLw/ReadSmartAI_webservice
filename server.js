@@ -810,6 +810,10 @@ app.post('/Teacher/text_sources/upload', (req, res, next) => {
     const teacher_id = req.session.userId;
     const file = req.file;
 
+    if (!file) {
+        return res.status(400).send('No file was uploaded.');
+    }
+
     const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf', 'text/plain'];
     if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).send('Invalid file type. Only .doc, .docx, .pdf, and .txt files are allowed.');
