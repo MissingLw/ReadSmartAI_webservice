@@ -759,6 +759,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 });
 
 // Route for viewing teachers text sources TODO
+// Route for viewing teachers text sources
 app.get('/Teacher/text_sources/', (req, res) => {
     const teacher_id = req.session.userId;
 
@@ -767,7 +768,13 @@ app.get('/Teacher/text_sources/', (req, res) => {
         if (error) throw error;
         const teacher = teacherResults[0];
 
-        res.render('text_sources', { teacher });
+        // Fetch text sources for the teacher
+        pool.query('SELECT * FROM TextSource WHERE teacher_id = ?', [teacher_id], (error, textSourceResults) => {
+            if (error) throw error;
+
+            // Render the view with the teacher and text sources
+            res.render('text_sources', { teacher, textSources: textSourceResults });
+        });
     });
 });
 

@@ -6,5 +6,21 @@
 <body>
     <h1>Text Sources for <%= teacher.name %></h1>
     <button onclick="location.href='/Teacher/text_sources/upload'">Upload Text Source</button>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% textSources.forEach(function(textSource) { %>
+                <tr>
+                    <td><%= textSource.name %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
 </body>
 </html>
