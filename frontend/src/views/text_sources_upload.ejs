@@ -5,10 +5,23 @@
 </head>
 <body>
     <h1>Upload Text Source for <%= teacher.name %></h1>
-    <form action="/Teacher/text_sources/upload" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="/Teacher/text_sources/upload" method="post" enctype="multipart/form-data">
         <label for="file">Choose a file:</label>
         <input type="file" id="file" name="file" accept=".doc,.docx,.pdf,.txt">
-        <input type="submit" value="Upload">
+        <input type="submit" value="Upload" id="uploadButton" disabled>
     </form>
+    <script>
+        document.getElementById('file').addEventListener('change', function() {
+            if (this.value) {
+                document.getElementById('uploadButton').disabled = false;
+            } else {
+                document.getElementById('uploadButton').disabled = true;
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', function() {
+            document.getElementById('uploadButton').disabled = true;
+        });
+    </script>
 </body>
 </html>
