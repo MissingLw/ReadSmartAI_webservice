@@ -8,6 +8,8 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
+const { BlobServiceClient } = require('@azure/storage-blob');
+const fs = require('fs');
 
 app.use(flash());
 app.use(express.json());
@@ -23,8 +25,8 @@ app.use(session({
   cookie: { secure: false } // Note: secure should be set to true when in production
 }));
 
-
-
+// const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
+const AZURE_STORAGE_CONNECTION_STRING = "U/xI0uCToxFhk5fKhKT6qsQK9jApG+i8IqCkqr4UwKdc5G54JFc4rr+XCD+r1ZvY6aVRcqEp48gh+AStxd0NFA==";
 
 
 
@@ -785,26 +787,36 @@ app.get('/Teacher/text_sources/upload', (req, res) => {
     });
 });
 
-app.post('/Teacher/text_sources/upload', upload.single('file'), (req, res) => {
+// Post Request for uploading text sources
+app.post('/Teacher/text_sources/upload', upload.single('file'), async (req, res) => {
     const teacher_id = req.session.userId;
     const file = req.file;
 
-    // Check the file type
     const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf', 'text/plain'];
     if (!allowedTypes.includes(file.mimetype)) {
         return res.status(400).send('Invalid file type. Only .doc, .docx, .pdf, and .txt files are allowed.');
     }
 
-    // Insert a new row into the TextSource table
-    pool.query('INSERT INTO TextSource (teacher_id, name) VALUES (?, ?)', [teacher_id, file.originalname], (error, result) => {
+    pool.query('INSERT INTO TextSource (teacher_id, name) VALUES (?, ?)', [teacher_id, file.originalname], async (error, result) => {
         if (error) {
             console.error('Error executing query:', error);
             return res.status(500).send('An error occurred while trying to save the file information.');
         }
 
-        // Upload the file (to be implemented)
+        const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
+        const containerClient = blobServiceClient.getContainerClient('readsmart-fstorage');
+        
+        // Create a blob name with the teacher_id as a prefix
+        const blobName = `${teacher_id}/${file.originalname}`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
-        // Redirect the user to the teacher text_sources page
+        // Create a readable stream from the file
+        const stream = fs.createReadStream(file.path);
+        const uploadOptions = { bufferSize: 4 * 1024, maxBuffers: 20 };
+        const uploadBlobResponse = await blockBlobClient.uploadStream(stream, uploadOptions.bufferSize, uploadOptions.maxBuffers);
+
+        console.log(`Upload block blob ${blobName} successfully`, uploadBlobResponse.requestId);
+
         res.redirect('/Teacher/text_sources/');
     });
 });
