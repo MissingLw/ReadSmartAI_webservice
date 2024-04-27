@@ -25,9 +25,7 @@ app.use(session({
   cookie: { secure: false } // Note: secure should be set to true when in production
 }));
 
-// const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
-const AZURE_STORAGE_CONNECTION_STRING = "U/xI0uCToxFhk5fKhKT6qsQK9jApG+i8IqCkqr4UwKdc5G54JFc4rr+XCD+r1ZvY6aVRcqEp48gh+AStxd0NFA==";
-
+const AZURE_STORAGE_CONNECTION_STRING = process.env.AZURE_STORAGE_CONNECTION_STRING;
 
 
 
