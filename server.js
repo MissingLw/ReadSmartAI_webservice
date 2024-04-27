@@ -6,6 +6,8 @@ const argon2 = require('argon2');
 const pool = require('./db-connector');
 const session = require('express-session');
 const flash = require('connect-flash');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 app.use(flash());
 app.use(express.json());
@@ -606,7 +608,7 @@ app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {
                 [student_id, assignment_id, correctnessPercentage]);
 
                 // Redirect the student to the classroom homepage
-                res.redirect(`/student/classroom/${invite_code}`);
+                res.redirect(`/student/classroom/${invite_code}/assignment/${assignment_id}/feedback`);
             })
             .catch(error => {
                 console.error(error);
@@ -756,8 +758,56 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
     });
 });
 
+// Route for viewing teachers text sources TODO
+app.get('/Teacher/text_sources/', (req, res) => {
+    const teacher_id = req.session.userId;
 
+    // Fetch teacher
+    pool.query('SELECT * FROM Teacher WHERE id = ?', [teacher_id], (error, teacherResults) => {
+        if (error) throw error;
+        const teacher = teacherResults[0];
 
+        res.render('text_sources', { teacher });
+    });
+});
+
+// Route for uploading text sources
+app.get('/Teacher/text_sources/upload', (req, res) => {
+    const teacher_id = req.session.userId;
+
+    // Fetch the teacher's data
+    pool.query('SELECT * FROM Teacher WHERE id = ?', [teacher_id], (error, teacherResults) => {
+        if (error) throw error;
+        const teacher = teacherResults[0];
+
+        // Render the text_sources_upload page with the teacher data
+        res.render('text_sources_upload', { teacher });
+    });
+});
+
+app.post('/Teacher/text_sources/upload', upload.single('file'), (req, res) => {
+    const teacher_id = req.session.userId;
+    const file = req.file;
+
+    // Check the file type
+    const allowedTypes = ['application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/pdf', 'text/plain'];
+    if (!allowedTypes.includes(file.mimetype)) {
+        return res.status(400).send('Invalid file type. Only .doc, .docx, .pdf, and .txt files are allowed.');
+    }
+
+    // Insert a new row into the TextSource table
+    pool.query('INSERT INTO TextSource (teacher_id, name) VALUES (?, ?)', [teacher_id, file.originalname], (error, result) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            return res.status(500).send('An error occurred while trying to save the file information.');
+        }
+
+        // Upload the file (to be implemented)
+
+        // Redirect the user to the teacher text_sources page
+        res.redirect('/Teacher/text_sources/');
+    });
+});
 
 
 // Start the server
