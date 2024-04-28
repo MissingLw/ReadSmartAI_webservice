@@ -737,7 +737,8 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 
                 // Send a request to the question_generator.py microservice
                 try {
-                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
+                    // const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
+                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body, {timeout: 300000});
                     console.log('Received questions from question_generator.py:', questions.data);
 
                     // Insert each question into the Question table
