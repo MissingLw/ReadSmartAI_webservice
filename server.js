@@ -10,7 +10,7 @@ const multer = require('multer');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
 const Queue = require('bull');
-const questionGenerationQueue = new Queue('question generation');
+const questionGenerationQueue = new Queue('question generation', process.env.REDIS_URL);
 
 app.use(flash());
 app.use(express.json());
