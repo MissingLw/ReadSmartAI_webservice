@@ -765,15 +765,15 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
     const teacher_id = req.session.userId;
 
     // Add a job to the queue
-    const job = questionGenerationQueue.add({
+    const job = await questionGenerationQueue.add({
         invite_code: invite_code,
         teacher_id: teacher_id,
         assignment_name: req.body['assignment-name'],
         req_body: req.body
     });
-    
+
     // Return the job ID to the client
-    job.then((job) => res.json({ jobId: job.id }));
+    res.json({ jobId: job.id });
 });
 
 // Polling endpoint
