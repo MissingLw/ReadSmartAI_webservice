@@ -8,10 +8,12 @@
             margin-top: 20px;
         }
     </style>
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Question Generator</h1>
-    <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
+    <form id="assignment-create-form" action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
         <div>
             <label for="assignment-name">Assignment Name:</label>
             <input type="text" id="assignment-name" name="assignment-name" required>
@@ -32,5 +34,30 @@
         <input type="submit" value="Submit">
     </form>
     <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
+
+    <!-- JavaScript for handling form submission and polling -->
+    <script>
+        $('#assignment-create-form').on('submit', function(e) {
+            e.preventDefault();
+
+            $.post($(this).attr('action'), $(this).serialize(), function(data) {
+                pollJobStatus(data.jobId);
+            });
+        });
+
+        function pollJobStatus(jobId) {
+            $.get('/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/status/' + jobId, function(data) {
+                if (data.status === 'completed') {
+                    window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment/' + data.data.assignmentId;
+                } else if (data.status === 'error') {
+                    alert('An error occurred while creating the assignment.');
+                } else {
+                    setTimeout(function() {
+                        pollJobStatus(jobId);
+                    }, 2000);
+                }
+            });
+        }
+    </script>
 </body>
 </html>

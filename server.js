@@ -9,6 +9,8 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
+const Queue = require('bull');
+const questionGenerationQueue = new Queue('question generation');
 
 app.use(flash());
 app.use(express.json());
@@ -711,34 +713,28 @@ app.get('/Teacher/classroom/:invite_code/assignment_create', (req, res) => {
     });
 });
 
-// Create a new assignment and populate it with questions
-app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) => {
-    console.log('Received POST request at /question with body:', req.body);
-
-    const invite_code = req.params.invite_code;
-    const teacher_id = req.session.userId;
+// Background Job For creating Questions
+questionGenerationQueue.process(async (job) => {
+    const { invite_code, teacher_id, assignment_name, req_body } = job.data;
 
     // Find the classroom with the given invite code
-    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], (error, classrooms) => {
+    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], async (error, classrooms) => {
         if (error) {
             console.error('Error executing query:', error);
-            res.status(500).send('An error occurred while trying to fetch the classroom data.');
             return;
         }
 
         if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
             // Create a new assignment for the classroom
-            pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, req.body['assignment-name']], async (error, result) => {
+            pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, assignment_name], async (error, result) => {
                 if (error) {
                     console.error('Error executing query:', error);
-                    res.status(500).send('An error occurred while trying to create the assignment.');
                     return;
                 }
 
                 // Send a request to the question_generator.py microservice
                 try {
-                    // const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
-                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body, {timeout: 300000});
+                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req_body, {timeout: 300000});
                     console.log('Received questions from question_generator.py:', questions.data);
 
                     // Insert each question into the Question table
@@ -750,19 +746,77 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                         });
                     }
 
-
-                    res.redirect(`/Teacher/classroom/${invite_code}/assignment/${result.insertId}`);
+                    // Store the assignment data somewhere where it can be accessed by the polling endpoint
+                    // This could be in a database, or in memory if the data isn't too large
+                    job.data.assignmentId = result.insertId;
                 } catch (error) {
                     console.error('Error sending request to question_generator.py:', error.message);
-                    res.status(500).send('An error occurred while generating the questions.');
                 }
             });
         } else {
-            req.flash('error', 'You are not the teacher of this classroom.');
-            res.redirect('/Teacher/homepage');
+            console.error('The user is not the teacher of this classroom.');
         }
     });
 });
+
+// Create a new assignment and populate it with questions
+app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) => {
+    const invite_code = req.params.invite_code;
+    const teacher_id = req.session.userId;
+
+    // Add a job to the queue
+    const job = await questionGenerationQueue.add({
+        invite_code: invite_code,
+        teacher_id: teacher_id,
+        assignment_name: req.body['assignment-name'],
+        req_body: req.body
+    });
+
+    // Return the job ID to the client
+    res.json({ jobId: job.id });
+});
+
+// Polling endpoint
+app.get('/Teacher/classroom/:invite_code/assignment_create/status/:jobId', async (req, res) => {
+    const jobId = req.params.jobId;
+
+    // Get the job
+    const job = await questionGenerationQueue.getJob(jobId);
+    if (!job) {
+        res.status(404).send('Job not found.');
+        return;
+    }
+
+    // Check if the job is done
+    if (job.isCompleted()) {
+        // If the job is done, return the assignment data
+        res.json({ status: 'completed', data: /* the assignment data */ });
+    } else if (job.isFailed()) {
+        // If the job failed, return an error
+        res.json({ status: 'error' });
+    } else {
+        // If the job is still processing, tell the client to keep waiting
+        res.json({ status: 'processing' });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Route for viewing teachers text sources
 app.get('/Teacher/text_sources/', (req, res) => {
