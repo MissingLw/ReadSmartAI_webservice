@@ -790,7 +790,7 @@ app.get('/Teacher/classroom/:invite_code/assignment_create/status/:jobId', async
     // Check if the job is done
     if (job.isCompleted()) {
         // If the job is done, return the assignment data
-        res.json({ status: 'completed', data: /* the assignment data */ });
+        res.json({ status: 'completed', assignmentId: job.data.assignmentId });
     } else if (job.isFailed()) {
         // If the job failed, return an error
         res.json({ status: 'error' });

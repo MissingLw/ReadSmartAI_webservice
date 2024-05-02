@@ -48,7 +48,8 @@
         function pollJobStatus(jobId) {
             $.get('/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/status/' + jobId, function(data) {
                 if (data.status === 'completed') {
-                    window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment/' + data.data.assignmentId;
+                    // Redirect to the assignment page
+                    window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment/' + data.assignmentId;
                 } else if (data.status === 'error') {
                     alert('An error occurred while creating the assignment.');
                 } else {
