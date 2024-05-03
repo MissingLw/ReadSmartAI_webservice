@@ -718,45 +718,25 @@ questionGenerationQueue.process(async (job) => {
     const { invite_code, teacher_id, assignment_name, req_body } = job.data;
 
     // Find the classroom with the given invite code
-    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], async (error, classrooms) => {
-        if (error) {
-            console.error('Error executing query:', error);
-            return;
+    const classrooms = await pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code]);
+    if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
+        // Create a new assignment for the classroom
+        const result = await pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, assignment_name]);
+
+        // Store the assignment ID in the job data
+        job.data.assignmentId = result.insertId;
+
+        // Send a request to the question_generator.py microservice
+        const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req_body, {timeout: 300000});
+        console.log('Received questions from question_generator.py:', questions.data);
+
+        // Insert each question into the Question table
+        for (const qa_pair of questions.data.qa_pairs) {
+            await pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]]);
         }
-
-        if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
-            // Create a new assignment for the classroom
-            pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, assignment_name], async (error, result) => {
-                if (error) {
-                    console.error('Error executing query:', error);
-                    return;
-                }
-
-                // Send a request to the question_generator.py microservice
-                try {
-                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req_body, {timeout: 300000});
-                    console.log('Received questions from question_generator.py:', questions.data);
-
-                    // Insert each question into the Question table
-                    for (const qa_pair of questions.data.qa_pairs) {
-                        pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]], (error, result) => {
-                            if (error) {
-                                console.error('Error executing query:', error);
-                            }
-                        });
-                    }
-
-                    // Store the assignment data somewhere where it can be accessed by the polling endpoint
-                    // This could be in a database, or in memory if the data isn't too large
-                    job.data.assignmentId = result.insertId;
-                } catch (error) {
-                    console.error('Error sending request to question_generator.py:', error.message);
-                }
-            });
-        } else {
-            console.error('The user is not the teacher of this classroom.');
-        }
-    });
+    } else {
+        console.error('The user is not the teacher of this classroom.');
+    }
 });
 
 // Create a new assignment and populate it with questions
