@@ -723,7 +723,8 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
         invite_code: invite_code,
         teacher_id: teacher_id,
         assignment_name: req.body['assignment-name'],
-        req_body: req.body
+        req_body: req.body,
+        webhookUrl: req.body['webhook-url'] // The client should send the webhook URL in the request body
     });
 
     console.log('Added job to queue with ID:', job.id);
@@ -736,7 +737,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 questionGenerationQueue.process(async (job) => {
     console.log('Processing job with ID:', job.id);
 
-    const { invite_code, teacher_id, assignment_name, req_body } = job.data;
+    const { invite_code, teacher_id, assignment_name, req_body, webhookUrl } = job.data;
 
     // Find the classroom with the given invite code
     const classrooms = await pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code]);
@@ -751,19 +752,22 @@ questionGenerationQueue.process(async (job) => {
             // Send a request to the question_generator.py microservice
             const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req_body, {timeout: 300000});
             console.log('Received questions from question_generator.py:', questions.data);
+
+            // Insert each question into the Question table
+            for (const qa_pair of questions.data.qa_pairs) {
+                await pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]]);
+            }
+
+            // When the job is done, send a POST request to the webhook URL
+            const assignmentData = { status: 'completed', assignmentId: job.data.assignmentId };
+            await axios.post(webhookUrl, assignmentData);
         } catch (error) {
             console.error('Error sending request to question_generator.py:', error);
-        }
-
-        // Insert each question into the Question table
-        for (const qa_pair of questions.data.qa_pairs) {
-            await pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]]);
         }
     } else {
         console.error('The user is not the teacher of this classroom.');
     }
 });
-
 
 
 // Polling endpoint
