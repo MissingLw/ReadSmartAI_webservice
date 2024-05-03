@@ -8,12 +8,10 @@
             margin-top: 20px;
         }
     </style>
-    <!-- Include jQuery -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <h1>Question Generator</h1>
-    <form id="assignment-create-form" action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
+    <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
         <div>
             <label for="assignment-name">Assignment Name:</label>
             <input type="text" id="assignment-name" name="assignment-name" required>
@@ -34,31 +32,5 @@
         <input type="submit" value="Submit">
     </form>
     <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
-
-    <!-- JavaScript for handling form submission and polling -->
-    <script>
-        // Create a WebSocket connection
-        const socket = new WebSocket('ws://your-server-url');
-    
-        $('#assignment-create-form').on('submit', function(e) {
-            e.preventDefault();
-    
-            $.post($(this).attr('action'), $(this).serialize(), function(data) {
-                // Send the job ID to the server over the WebSocket
-                socket.send(JSON.stringify({ jobId: data.jobId }));
-            });
-        });
-    
-        // Listen for messages from the server
-        socket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.status === 'completed') {
-                // Redirect to the assignment page
-                window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment/' + data.assignmentId;
-            } else if (data.status === 'error') {
-                alert('An error occurred while creating the assignment.');
-            }
-        };
-    </script>
 </body>
 </html>
