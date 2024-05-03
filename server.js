@@ -9,8 +9,6 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
-const Queue = require('bull');
-const questionGenerationQueue = new Queue('question generation', process.env.REDIS_TLS_URL);
 
 app.use(flash());
 app.use(express.json());
@@ -715,102 +713,56 @@ app.get('/Teacher/classroom/:invite_code/assignment_create', (req, res) => {
 
 // Create a new assignment and populate it with questions
 app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) => {
+    console.log('Received POST request at /question with body:', req.body);
+
     const invite_code = req.params.invite_code;
     const teacher_id = req.session.userId;
 
-    // Add a job to the queue
-    const job = await questionGenerationQueue.add({
-        invite_code: invite_code,
-        teacher_id: teacher_id,
-        assignment_name: req.body['assignment-name'],
-        req_body: req.body,
-        webhookUrl: req.body['webhook-url'] // The client should send the webhook URL in the request body
-    });
-
-    console.log('Added job to queue with ID:', job.id);
-
-    // Return the job ID to the client
-    res.json({ jobId: job.id });
-});
-
-// Background Job For creating Questions
-questionGenerationQueue.process(async (job) => {
-    console.log('Processing job with ID:', job.id);
-
-    const { invite_code, teacher_id, assignment_name, req_body, webhookUrl } = job.data;
-
     // Find the classroom with the given invite code
-    const classrooms = await pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code]);
-    if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
-        // Create a new assignment for the classroom
-        const result = await pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, assignment_name]);
-
-        // Store the assignment ID in the job data
-        job.data.assignmentId = result.insertId;
-
-        try {
-            // Send a request to the question_generator.py microservice
-            const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req_body, {timeout: 300000});
-            console.log('Received questions from question_generator.py:', questions.data);
-
-            // Insert each question into the Question table
-            for (const qa_pair of questions.data.qa_pairs) {
-                await pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]]);
-            }
-
-            // When the job is done, send a POST request to the webhook URL
-            const assignmentData = { status: 'completed', assignmentId: job.data.assignmentId };
-            await axios.post(webhookUrl, assignmentData);
-        } catch (error) {
-            console.error('Error sending request to question_generator.py:', error);
+    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], (error, classrooms) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to fetch the classroom data.');
+            return;
         }
-    } else {
-        console.error('The user is not the teacher of this classroom.');
-    }
+
+        if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
+            // Create a new assignment for the classroom
+            pool.query('INSERT INTO Assignment (classroom_id, name) VALUES (?, ?)', [classrooms[0].id, req.body['assignment-name']], async (error, result) => {
+                if (error) {
+                    console.error('Error executing query:', error);
+                    res.status(500).send('An error occurred while trying to create the assignment.');
+                    return;
+                }
+
+                // Send a request to the question_generator.py microservice
+                try {
+                    // const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
+                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body, {timeout: 300000});
+                    console.log('Received questions from question_generator.py:', questions.data);
+
+                    // Insert each question into the Question table
+                    for (const qa_pair of questions.data.qa_pairs) {
+                        pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]], (error, result) => {
+                            if (error) {
+                                console.error('Error executing query:', error);
+                            }
+                        });
+                    }
+
+
+                    res.redirect(`/Teacher/classroom/${invite_code}/assignment/${result.insertId}`);
+                } catch (error) {
+                    console.error('Error sending request to question_generator.py:', error.message);
+                    res.status(500).send('An error occurred while generating the questions.');
+                }
+            });
+        } else {
+            req.flash('error', 'You are not the teacher of this classroom.');
+            res.redirect('/Teacher/homepage');
+        }
+    });
 });
-
-
-// Polling endpoint
-app.get('/Teacher/classroom/:invite_code/assignment_create/status/:jobId', async (req, res) => {
-    const jobId = req.params.jobId;
-
-    // Get the job
-    const job = await questionGenerationQueue.getJob(jobId);
-    if (!job) {
-        res.status(404).send('Job not found.');
-        return;
-    }
-
-    // Check if the job is done
-    if (job.isCompleted()) {
-        // If the job is done, return the assignment data
-        res.json({ status: 'completed', assignmentId: job.data.assignmentId });
-    } else if (job.isFailed()) {
-        // If the job failed, return an error
-        res.json({ status: 'error' });
-    } else {
-        // If the job is still processing, tell the client to keep waiting
-        res.json({ status: 'processing' });
-    }
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Route for viewing teachers text sources
 app.get('/Teacher/text_sources/', (req, res) => {
