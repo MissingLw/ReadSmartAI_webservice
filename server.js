@@ -746,7 +746,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 jobs[jobId] = { status: 'pending', result: null };
 
                 // Start the question generation process in the background
-                generateQuestions(jobId, req.body, result.insertId);
+                generateQuestions(jobId, body, assignmentId, invite_code);
 
                 // Respond with the job ID
                 res.json({ jobId });
@@ -759,7 +759,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 });
 
 // A function to generate questions in the background
-async function generateQuestions(jobId, body, assignmentId) {
+async function generateQuestions(jobId, body, assignmentId, invite_code) {
     try {
         const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', body, {timeout: 300000});
 
@@ -781,6 +781,7 @@ async function generateQuestions(jobId, body, assignmentId) {
         // Update the job status
         jobs[jobId].status = 'error';
     }
+}
 }
 
 // Check the status of a job
