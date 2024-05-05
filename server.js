@@ -770,7 +770,9 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 const body = {
                     'assignment-name': req.body['assignment-name'],
                     'text-source': req.body['text-source'],
-                    'question-count': req.body['question-count']
+                    'question-count': req.body['question-count'],
+                    'start-page': req.body['start-page'],
+                    'end-page': req.body['end-page']
                 };
 
                 // Start the question generation process in the background
