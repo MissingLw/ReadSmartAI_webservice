@@ -22,7 +22,7 @@
             <label for="text-source">Text Source:</label>
             <select id="text-source" name="text-source">
                 <% textSources.forEach((textSource) => { %>
-                    <option value="<%= textSource.id %>"><%= textSource.name %></option>
+                    <option value="<%= textSource.name %>"><%= textSource.name %></option>
                 <% }); %>
             </select>
         </div>
