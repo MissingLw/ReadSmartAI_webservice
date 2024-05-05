@@ -702,14 +702,12 @@ app.get('/student/classroom/:invite_code/assignment/:id/feedback', (req, res) =>
 
 
 
-// QUESTION CREATION AND ANSWER ROUTES AND HANDLERS Before
+// QUESTION CREATION AND ANSWER ROUTES AND HANDLERS
 
 // Route for question creation screen
 app.get('/Teacher/classroom/:invite_code/assignment_create', (req, res) => {
     const invite_code = req.params.invite_code;
     const teacher_id = req.session.userId;
-
-    // console.log(`invite_code: ${invite_code}, teacher_id: ${teacher_id}`);
 
     pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], (error, classrooms) => {
         if (error) {
@@ -718,11 +716,18 @@ app.get('/Teacher/classroom/:invite_code/assignment_create', (req, res) => {
             return;
         }
 
-        // console.log(classrooms);
-
         if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
-            res.render('assignment_create', {classroom: classrooms[0]});
-            // res.render('login_teacher');
+            // Fetch the text sources for the teacher
+            pool.query('SELECT * FROM TextSource WHERE teacher_id = ?', [teacher_id], (error, textSources) => {
+                if (error) {
+                    console.error('Error executing query:', error);
+                    res.status(500).send('An error occurred while trying to fetch the text sources.');
+                    return;
+                }
+
+                // Render the assignment creation page with the classroom and text sources
+                res.render('assignment_create', {classroom: classrooms[0], textSources});
+            });
         } else {
             req.flash('error', 'You are not the teacher of this classroom.');
             res.redirect('/Teacher/homepage');

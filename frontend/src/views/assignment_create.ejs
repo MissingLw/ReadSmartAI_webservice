@@ -21,10 +21,9 @@
         <div>
             <label for="text-source">Text Source:</label>
             <select id="text-source" name="text-source">
-                <option value="tell_tale_heart">The Tell Tale Heart</option>
-                <option value="most_dangerous_game">The Most Dangerous Game</option>
-                <option value="lamb_to_the_slaughter">Lamb To The Slaughter</option>
-                <option value="daedalus_and_icarus">Daedalus and Icarus</option>
+                <% textSources.forEach((textSource) => { %>
+                    <option value="<%= textSource.id %>"><%= textSource.name %></option>
+                <% }); %>
             </select>
         </div>
         <div>
