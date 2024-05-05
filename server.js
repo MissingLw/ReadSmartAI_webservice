@@ -745,8 +745,15 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 // Store the job ID and initial status in the jobs data structure
                 jobs[jobId] = { status: 'pending', result: null };
 
+                // Define the body for the question generation request
+                const body = {
+                    'assignment-name': req.body['assignment-name'],
+                    'text-source': req.body['text-source'],
+                    'question-count': req.body['question-count']
+                };
+
                 // Start the question generation process in the background
-                generateQuestions(jobId, body, assignmentId, invite_code);
+                generateQuestions(jobId, body, result.insertId, invite_code);
 
                 // Respond with the job ID
                 res.json({ jobId });
