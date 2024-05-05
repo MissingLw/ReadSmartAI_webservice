@@ -316,17 +316,24 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id', (req, res) => {
                                 return;
                             }
 
-                            // Fetch the completed assignments for the assignment
-                            pool.query('SELECT CompletedAssignments.* FROM CompletedAssignments WHERE assignment_id = ?', [assignment_id], (error, completedAssignments) => {
-                                if (error) {
-                                    console.error(error);
-                                    res.status(500).send('An error occurred while trying to fetch the completed assignments data.');
-                                    return;
-                                }
+                            // Fetch the completed assignments for the assignment along with the student's information
+                            pool.query(`
+                                SELECT CompletedAssignments.*, Student.name 
+                                FROM CompletedAssignments 
+                                JOIN Student ON CompletedAssignments.student_id = Student.id 
+                                WHERE assignment_id = ?`, 
+                                [assignment_id], 
+                                (error, completedAssignments) => {
+                                    if (error) {
+                                        console.error(error);
+                                        res.status(500).send('An error occurred while trying to fetch the completed assignments data.');
+                                        return;
+                                    }
 
-                                // Render the assignment overview page with the assignment, students, responses, and completed assignments data
-                                res.render('teacher_assignment_overview', { classroom: classrooms[0], assignment: assignments[0], students, responses, completedAssignments });
-                            });
+                                    // Render the assignment overview page with the assignment, students, responses, and completed assignments data
+                                    res.render('teacher_assignment_overview', { classroom: classrooms[0], assignment: assignments[0], students, responses, completedAssignments });
+                                }
+                            );
                         });
                     });
                 } else {

@@ -10,10 +10,10 @@
     <div class="student-container">
         <% students.forEach(student => { %>
             <div class="student">
-                <% let response = responses.find(response => response.student_id === student.id); %>
-                <% if (response) { %>
+                <% let completedAssignment = completedAssignments.find(completedAssignment => completedAssignment.student_id === student.id); %>
+                <% if (completedAssignment) { %>
                     <h2><a href="/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/student_results/<%= student.id %>"><%= student.name %></a>:</h2>
-                    <p>Percentage Correct: <%= response.correctness_percentage %> Date Completed: <%= response.completion_date %></p>
+                    <p>Percentage Correct: <%= completedAssignment.correctness_percentage %> Date Completed: <%= completedAssignment.completion_date %></p>
                 <% } else { %>
                     <h2><%= student.name %>:</h2>
                     <p>Not Taken Yet</p>
