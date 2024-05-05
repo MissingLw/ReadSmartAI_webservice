@@ -9,6 +9,9 @@ const flash = require('connect-flash');
 const multer = require('multer');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const fs = require('fs');
+const { v4: uuidv4 } = require('uuid'); // Add this at the top of your file
+const jobs = {};
+
 
 app.use(flash());
 app.use(express.json());
@@ -711,6 +714,7 @@ app.get('/Teacher/classroom/:invite_code/assignment_create', (req, res) => {
     });
 });
 
+
 // Create a new assignment and populate it with questions
 app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) => {
     console.log('Received POST request at /question with body:', req.body);
@@ -735,27 +739,17 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                     return;
                 }
 
-                // Send a request to the question_generator.py microservice
-                try {
-                    // const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body);
-                    const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', req.body, {timeout: 300000});
-                    console.log('Received questions from question_generator.py:', questions.data);
+                // Generate a unique job ID
+                const jobId = uuidv4();
 
-                    // Insert each question into the Question table
-                    for (const qa_pair of questions.data.qa_pairs) {
-                        pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [result.insertId, qa_pair[0], qa_pair[1]], (error, result) => {
-                            if (error) {
-                                console.error('Error executing query:', error);
-                            }
-                        });
-                    }
+                // Store the job ID and initial status in the jobs data structure
+                jobs[jobId] = { status: 'pending', result: null };
 
+                // Start the question generation process in the background
+                generateQuestions(jobId, req.body, result.insertId);
 
-                    res.redirect(`/Teacher/classroom/${invite_code}/assignment/${result.insertId}`);
-                } catch (error) {
-                    console.error('Error sending request to question_generator.py:', error.message);
-                    res.status(500).send('An error occurred while generating the questions.');
-                }
+                // Respond with the job ID
+                res.json({ jobId });
             });
         } else {
             req.flash('error', 'You are not the teacher of this classroom.');
@@ -763,6 +757,63 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
         }
     });
 });
+
+// A function to generate questions in the background
+async function generateQuestions(jobId, body, assignmentId) {
+    try {
+        const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', body, {timeout: 300000});
+
+        // Insert each question into the Question table
+        for (const qa_pair of questions.data.qa_pairs) {
+            pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [assignmentId, qa_pair[0], qa_pair[1]], (error, result) => {
+                if (error) {
+                    console.error('Error executing query:', error);
+                }
+            });
+        }
+
+        // Update the job status and result
+        jobs[jobId].status = 'complete';
+        jobs[jobId].result = `/Teacher/classroom/${invite_code}/assignment/${result.insertId}`;
+    } catch (error) {
+        console.error('Error sending request to question_generator.py:', error.message);
+
+        // Update the job status
+        jobs[jobId].status = 'error';
+    }
+}
+
+// Check the status of a job
+app.get('/job/:jobId/status', (req, res) => {
+    const jobId = req.params.jobId;
+
+    // Get the status and result of the job
+    const job = jobs[jobId];
+
+    if (job) {
+        res.json(job);
+    } else {
+        res.status(404).send('Job not found.');
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // Route for viewing teachers text sources
 app.get('/Teacher/text_sources/', (req, res) => {

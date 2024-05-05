@@ -8,9 +8,11 @@
             margin-top: 20px;
         }
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> <!-- Add this line to include jQuery -->
 </head>
 <body>
     <h1>Question Generator</h1>
+    <form id="assignment-form"> <!-- Add an ID to the form -->
     <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
         <div>
             <label for="assignment-name">Assignment Name:</label>
@@ -32,5 +34,30 @@
         <input type="submit" value="Submit">
     </form>
     <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
+
+    <script>
+        $(document).ready(function() {
+            $('#assignment-form').submit(function(event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                $.post('/Teacher/classroom/<%= classroom.invite_code %>/assignment_create', $(this).serialize(), function(data) {
+                    const jobId = data.jobId;
+
+                    // Check the status of the job every second
+                    const intervalId = setInterval(function() {
+                        $.get('/job/' + jobId + '/status', function(data) {
+                            if (data.status === 'complete') {
+                                clearInterval(intervalId); // Stop checking the status
+                                window.location.href = data.result; // Redirect to the result
+                            } else if (data.status === 'error') {
+                                clearInterval(intervalId); // Stop checking the status
+                                alert('An error occurred while generating the questions.');
+                            }
+                        });
+                    }, 1000);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
