@@ -30,6 +30,14 @@
             <label for="question-count">Number of Questions:</label>
             <input type="number" id="question-count" name="question-count" min="1" max="5">
         </div>
+        <div>
+            <label for="start-page">PDFS ONLY - Start Page:</label>
+            <input type="number" id="start-page" name="start-page" min="1" value="1" required>
+        </div>
+        <div>
+            <label for="end-page">PDFS ONLY - End Page:</label>
+            <input type="number" id="end-page" name="end-page" min="1" value="1" required>
+        </div>
         <input type="submit" value="Submit">
     </form>
     <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
