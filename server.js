@@ -774,7 +774,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 };
 
                 // Start the question generation process in the background
-                generateQuestions(jobId, body, result.insertId, invite_code, result.insertId);
+                generateQuestions(jobId, body, result.insertId, invite_code, result.insertId, teacher_id);
 
 
                 // Respond with the job ID
@@ -788,9 +788,14 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 });
 
 // A function to generate questions in the background
-async function generateQuestions(jobId, body, assignmentId, invite_code, assignmentInsertId) {
+async function generateQuestions(jobId, body, assignmentId, invite_code, assignmentInsertId, teacher_id) {
     try {
-        const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', body, {timeout: 300000});
+        const bodyWithTeacherId = {
+            ...body,
+            'teacher-id': teacher_id
+        };
+
+        const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', bodyWithTeacherId, {timeout: 300000});
 
         // Insert each question into the Question table
         for (const qa_pair of questions.data.qa_pairs) {
