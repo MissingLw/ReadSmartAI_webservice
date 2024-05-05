@@ -391,18 +391,19 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/student_results/:student
                             (error, questions) => {
                                 if (error) throw error;
 
-                                // Fetch the correctness percentage for the assignment
+                                // Fetch the correctness percentage and completion date for the assignment
                                 pool.query(`
-                                    SELECT correctness_percentage 
+                                    SELECT correctness_percentage, completion_date 
                                     FROM CompletedAssignments 
                                     WHERE student_id = ? AND assignment_id = ?`, 
                                     [student.id, assignment_id], 
                                     (error, results) => {
                                         if (error) throw error;
                                         const correctnessPercentage = results[0].correctness_percentage;
+                                        const completionDate = results[0].completion_date;
 
-                                        // Render the assignment feedback page with the assignment, questions, correctness percentage, and student data
-                                        res.render('teacher_student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage, student });
+                                        // Render the assignment feedback page with the assignment, questions, correctness percentage, completion date, and student data
+                                        res.render('teacher_student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage, completionDate, student });
                                     }
                                 );
                             }
