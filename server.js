@@ -753,7 +753,8 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 };
 
                 // Start the question generation process in the background
-                generateQuestions(jobId, body, result.insertId, invite_code);
+                generateQuestions(jobId, body, result.insertId, invite_code, result.insertId);
+
 
                 // Respond with the job ID
                 res.json({ jobId });
@@ -766,7 +767,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 });
 
 // A function to generate questions in the background
-async function generateQuestions(jobId, body, assignmentId, invite_code) {
+async function generateQuestions(jobId, body, assignmentId, invite_code, assignmentInsertId) {
     try {
         const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', body, {timeout: 300000});
 
@@ -781,7 +782,7 @@ async function generateQuestions(jobId, body, assignmentId, invite_code) {
 
         // Update the job status and result
         jobs[jobId].status = 'complete';
-        jobs[jobId].result = `/Teacher/classroom/${invite_code}/assignment/${result.insertId}`;
+        jobs[jobId].result = `/Teacher/classroom/${invite_code}/assignment/${assignmentInsertId}`;
     } catch (error) {
         console.error('Error sending request to question_generator.py:', error.message);
 
