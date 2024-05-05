@@ -789,7 +789,6 @@ async function generateQuestions(jobId, body, assignmentId, invite_code) {
         jobs[jobId].status = 'error';
     }
 }
-}
 
 // Check the status of a job
 app.get('/job/:jobId/status', (req, res) => {
