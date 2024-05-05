@@ -509,7 +509,14 @@ app.get('/student/classroom/:invite_code', (req, res) => {
 
                         // Separate the assignments into completed and not completed
                         const completedAssignmentIds = completedAssignments.map(a => a.assignment_id);
-                        const completed = assignments.filter(a => completedAssignmentIds.includes(a.id));
+                        const completed = assignments.filter(a => completedAssignmentIds.includes(a.id)).map(assignment => {
+                            const completedAssignment = completedAssignments.find(a => a.assignment_id === assignment.id);
+                            return {
+                                ...assignment,
+                                correctness_percentage: completedAssignment.correctness_percentage,
+                                completion_date: completedAssignment.completion_date
+                            };
+                        });
                         const notCompleted = assignments.filter(a => !completedAssignmentIds.includes(a.id));
 
                         // Render the classroom homepage with the classroom, teacher, and assignments data
@@ -665,18 +672,19 @@ app.get('/student/classroom/:invite_code/assignment/:id/feedback', (req, res) =>
                     (error, questions) => {
                         if (error) throw error;
 
-                        // Fetch the correctness percentage for the assignment
+                        // Fetch the correctness percentage and completion date for the assignment
                         pool.query(`
-                            SELECT correctness_percentage 
+                            SELECT correctness_percentage, completion_date 
                             FROM CompletedAssignments 
                             WHERE student_id = ? AND assignment_id = ?`, 
                             [student_id, assignment_id], 
                             (error, results) => {
                                 if (error) throw error;
                                 const correctnessPercentage = results[0].correctness_percentage;
+                                const completionDate = results[0].completion_date;
 
-                                // Render the assignment feedback page with the assignment, questions, and correctness percentage data
-                                res.render('student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage });
+                                // Render the assignment feedback page with the assignment, questions, correctness percentage, and completion date data
+                                res.render('student_assignment_feedback', { classroom, assignment, questions, correctnessPercentage, completionDate });
                             }
                         );
                     }

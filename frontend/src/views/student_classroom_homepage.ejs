@@ -26,6 +26,8 @@
                 <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/feedback">
                     <%= assignment.name %>
                 </a>
+                <p>Correctness Percentage: <%= assignment.correctness_percentage %></p>
+                <p>Completion Date: <%= assignment.completion_date %></p>
             </li>
         <% }); %>
     </ul>
