@@ -25,6 +25,11 @@
                     <option value="<%= textSource.name %>"><%= textSource.name %></option>
                 <% }); %>
             </select>
+            <textarea id="raw-text" name="raw-text" style="display: none;"></textarea> <!-- Add this line -->
+        </div>
+        <div>
+            <input type="checkbox" id="use-raw-text" name="use-raw-text"> <!-- Add this line -->
+            <label for="use-raw-text">Use raw text</label> <!-- Add this line -->
         </div>
         <div>
             <label for="question-count">Number of Questions:</label>
@@ -44,6 +49,15 @@
 
     <script>
         $(document).ready(function() {
+            $('#use-raw-text').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#text-source').prop('disabled', true);
+                    $('#raw-text').show().prop('required', true);
+                } else {
+                    $('#text-source').prop('disabled', false);
+                    $('#raw-text').hide().prop('required', false);
+                }
+            });
             $('#assignment-form').submit(function(event) {
                 event.preventDefault(); // Prevent the default form submission
 
