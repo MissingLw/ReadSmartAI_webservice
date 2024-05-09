@@ -1,8 +1,6 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #DDE0C9; /* Main parts of the page */
-    margin: 0;
-    padding: 0;
 }
 
 .navbar {
@@ -36,7 +34,6 @@ body {
 .centered-title {
     text-align: center;
     font-size: 3em;
-    margin-top: 10vh; /* Adjust this value as needed */
 }
 
 .centered-button {
