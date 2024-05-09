@@ -859,7 +859,7 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/question_review', (req, 
                 }
 
                 // Render the review_questions.ejs page with the questions
-                res.render('review_questions', { questions, classroom: classrooms[0] });
+                res.render('review_questions', { questions, classroom: classrooms[0], assignment_id });
             });
         } else {
             req.flash('error', 'You are not the teacher of this classroom.');
