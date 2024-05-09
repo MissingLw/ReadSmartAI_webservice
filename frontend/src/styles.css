@@ -71,4 +71,5 @@ body {
     align-items: center;
     height: 20vh;
     flex-direction: column;
+    height: 10vh; /* Adjust this value as needed */
 }
