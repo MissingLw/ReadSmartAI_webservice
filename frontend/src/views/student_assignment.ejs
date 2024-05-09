@@ -6,6 +6,7 @@
 </head>
 <body>
     <%- include('partials/student_navbar_in_classroom') %>
+    <div id="loading" style="display: none;">Loading...</div>
     <h1><%= assignment.name %></h1>
 
     <form action="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>" method="POST">
@@ -17,5 +18,15 @@
         <% }); %>
         <button type="submit">Submit Assignment</button>
     </form>
+
+    <script>
+        document.getElementById('assignmentForm').addEventListener('submit', function() {
+            // Disable the submit button
+            document.getElementById('submitBtn').disabled = true;
+
+            // Show the loading text
+            document.getElementById('loading').style.display = 'block';
+        });
+    </script>
 </body>
 </html>
