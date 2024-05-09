@@ -5,7 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
-    <%- include('partials/teacher_navbar') %>
+    <%- include('partials/teacher_navbar_in_classroom') %>
     <h1><%= assignment.name %> - Student Results</h1>
     <button onclick="location.href='/Teacher/classroom/<%= classroom.invite_code %>'">Back to Classroom</button>
     <div class="student-container">
