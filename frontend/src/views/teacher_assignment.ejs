@@ -16,17 +16,7 @@
                 <input type="text" id="question_<%= index %>" name="question_<%= question.id %>" required>
             </div>
         <% }); %>
-        <button id="submitBtn" type="submit">Submit Assignment</button>
     </form>
 
-    <script>
-        document.getElementById('assignmentForm').addEventListener('submit', function() {
-            // Disable the submit button
-            document.getElementById('submitBtn').disabled = true;
-
-            // Show the loading text
-            document.getElementById('loading').style.display = 'block';
-        });
-    </script>
 </body>
 </html>
