@@ -74,15 +74,21 @@
                         $.get('/job/' + jobId + '/status', function(data) {
                             if (data.status === 'complete') {
                                 clearInterval(intervalId); // Stop checking the status
+            
+                                // Enable the submit button and hide the loading spinner
+                                $('input[type="submit"]').prop('disabled', false);
+                                $('#loading').hide();
+            
                                 window.location.href = data.result; // Redirect to the result
                             } else if (data.status === 'error') {
                                 clearInterval(intervalId); // Stop checking the status
+            
+                                // Enable the submit button and hide the loading spinner
+                                $('input[type="submit"]').prop('disabled', false);
+                                $('#loading').hide();
+            
                                 alert('An error occurred while generating the questions.');
                             }
-            
-                            // Enable the submit button and hide the loading spinner
-                            $('input[type="submit"]').prop('disabled', false);
-                            $('#loading').hide();
                         });
                     }, 1000);
                 });
