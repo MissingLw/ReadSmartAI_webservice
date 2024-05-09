@@ -28,7 +28,7 @@
             const updatedQuestion = prompt('Enter the updated question:');
             const updatedAnswer = prompt('Enter the updated answer:');
 
-            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/<%= assignment_id %>/question_review/edit`, { questionId, updatedQuestion, updatedAnswer }, function(data) {
+            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment_id %>/question_review/edit`, { questionId, updatedQuestion, updatedAnswer }, function(data) {
                 location.reload();
             });
         });
@@ -36,7 +36,7 @@
         $('.delete-button').click(function() {
             const questionId = $(this).data('question-id');
 
-            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/<%= assignment_id %>/question_review/delete`, { questionId }, function(data) {
+            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment_id %>/question_review/delete`, { questionId }, function(data) {
                 location.reload();
             });
         });
@@ -45,13 +45,13 @@
             const newQuestion = prompt('Enter the new question:');
             const newAnswer = prompt('Enter the new answer:');
 
-            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/<%= assignment_id %>/question_review/add`, { newQuestion, newAnswer }, function(data) {
+            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment_id %>/question_review/add`, { newQuestion, newAnswer }, function(data) {
                 location.reload();
             });
         });
 
         $('#finalize-button').click(function() {
-            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/<%= assignment_id %>/question_review/finalize`, function(data) {
+            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment_id %>/question_review/finalize`, function(data) {
                 location.reload();
             });
         });
