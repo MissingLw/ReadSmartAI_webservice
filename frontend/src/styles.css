@@ -70,6 +70,7 @@ body {
     align-items: center;
     height: 20vh;
     flex-direction: column;
+    font-size: medium;
 }
 
 .centered-form form input[type="email"],
