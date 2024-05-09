@@ -18,7 +18,7 @@ body {
     color: white; /* Change this to the color you want for the text */
     background-color: #DDE0C9; /* Change this to the color you want for the button */
     padding: 10px 20px; /* Add some padding around the text */
-    margin-left: 10px; /* Add some space between the buttons */
+    /* margin-left: 10px; /* Add some space between the buttons */
     margin-right: 10px;
     border-radius: 5px; /* Make the buttons rounded */
 }
