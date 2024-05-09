@@ -578,10 +578,10 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/take_assignment', (req, 
     pool.query(`
         SELECT * 
         FROM Classroom 
-        JOIN ClassroomTeacher ON Classroom.id = ClassroomTeacher.classroom_id 
+        JOIN Teacher ON Classroom.teacher_id = Teacher.id 
         JOIN Assignment ON Classroom.id = Assignment.classroom_id 
         WHERE Classroom.invite_code = ? 
-        AND ClassroomTeacher.teacher_id = ? 
+        AND Teacher.id = ? 
         AND Assignment.id = ?`, 
         [invite_code, teacher_id, assignment_id], 
         (error, results) => {
