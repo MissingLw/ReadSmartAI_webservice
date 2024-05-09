@@ -74,6 +74,8 @@ body {
     font-size: medium;
 }
 
+.centered-form form input[type="accountType"],
+.centered-form form input[type="name"],
 .centered-form form input[type="email"],
 .centered-form form input[type="password"] {
     margin-bottom: 20px; /* Adjust this value as needed */
