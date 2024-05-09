@@ -804,7 +804,62 @@ app.get('/student/classroom/:invite_code/assignment/:id/feedback', (req, res) =>
     );
 });
 
+// Route for Teacher Self Feedback Page
+app.get('/Teacher/classroom/:invite_code/assignment/:id/self_feedback', (req, res) => {
+    const invite_code = req.params.invite_code;
+    const assignment_id = req.params.id;
+    const teacher_id = req.session.userId;
 
+    // Check if the teacher and assignment belong to the classroom
+    pool.query(`
+        SELECT * 
+        FROM Classroom 
+        JOIN ClassroomTeacher ON Classroom.id = ClassroomTeacher.classroom_id 
+        JOIN Assignment ON Classroom.id = Assignment.classroom_id 
+        WHERE Classroom.invite_code = ? 
+        AND ClassroomTeacher.teacher_id = ? 
+        AND Assignment.id = ?`, 
+        [invite_code, teacher_id, assignment_id], 
+        (error, results) => {
+            if (error) throw error;
+            if (results.length > 0) {
+                const classroom = results[0];
+                const assignment = results[0];
+
+                // Fetch the questions, teacher responses, and feedback for the assignment
+                pool.query(`
+                    SELECT Question.*, StudentResponse.teacher_answer, StudentResponse.feedback 
+                    FROM Question 
+                    JOIN StudentResponse ON Question.id = StudentResponse.question_id 
+                    WHERE Question.assignment_id = ? AND StudentResponse.teacher_id = ?`, 
+                    [assignment_id, teacher_id], 
+                    (error, questions) => {
+                        if (error) throw error;
+
+                        // Fetch the correctness percentage and completion date for the assignment
+                        pool.query(`
+                            SELECT correctness_percentage, completion_date 
+                            FROM TeacherCompletedAssignments 
+                            WHERE teacher_id = ? AND assignment_id = ?`, 
+                            [teacher_id, assignment_id], 
+                            (error, results) => {
+                                if (error) throw error;
+                                const correctnessPercentage = results[0].correctness_percentage;
+                                const completionDate = results[0].completion_date;
+
+                                // Render the assignment feedback page with the assignment, questions, correctness percentage, and completion date data
+                                res.render('teacher_self_feedback', { classroom, assignment, questions, correctnessPercentage, completionDate });
+                            }
+                        );
+                    }
+                );
+            } else {
+                // The teacher or assignment does not belong to the classroom, redirect to the teacher homepage
+                res.redirect('/Teacher/homepage');
+            }
+        }
+    );
+});
 
 
 
