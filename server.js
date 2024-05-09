@@ -594,7 +594,7 @@ app.get('/Teacher/classroom/:invite_code/assignment/:id/take_assignment', (req, 
                     if (error) throw error;
 
                     // Render the assignment page with the assignment and questions data
-                    res.render('teacher_take_assignment', { classroom, assignment: results[0], questions });
+                    res.render('teacher_assignment', { classroom, assignment: results[0], questions });
                 });
             } else {
                 // The teacher or assignment does not belong to the classroom, redirect to the teacher homepage
