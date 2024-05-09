@@ -837,7 +837,7 @@ app.get('/job/:jobId/status', (req, res) => {
 });
 
 
-app.get('/Teacher/classroom/:invite_code/assignment_create/:id/question_review', (req, res) => {
+app.get('/Teacher/classroom/:invite_code/assignment/:id/question_review', (req, res) => {
     const invite_code = req.params.invite_code;
     const teacher_id = req.session.userId;
     const assignment_id = req.params.id;
@@ -869,7 +869,7 @@ app.get('/Teacher/classroom/:invite_code/assignment_create/:id/question_review',
 });
 
 
-app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/edit', (req, res) => {
+app.post('/Teacher/classroom/:invite_code/assignment/:id/question_review/edit', (req, res) => {
     const { questionId, updatedQuestion, updatedAnswer } = req.body;
 
     pool.query('UPDATE TempQuestion SET question_text = ?, correct_answer = ? WHERE id = ?', [updatedQuestion, updatedAnswer, questionId], (error, results) => {
@@ -883,7 +883,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/
     });
 });
 
-app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/delete', (req, res) => {
+app.post('/Teacher/classroom/:invite_code/assignment/:id/question_review/delete', (req, res) => {
     const { questionId } = req.body;
 
     pool.query('DELETE FROM TempQuestion WHERE id = ?', [questionId], (error, results) => {
@@ -897,7 +897,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/
     });
 });
 
-app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/add', (req, res) => {
+app.post('/Teacher/classroom/:invite_code/assignment/:id/question_review/add', (req, res) => {
     const { newQuestion, newAnswer } = req.body;
     const assignment_id = req.params.id;
 
@@ -912,7 +912,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/
     });
 });
 
-app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/finalize', (req, res) => {
+app.post('/Teacher/classroom/:invite_code/assignment/:id/question_review/finalize', (req, res) => {
     const assignment_id = req.params.id;
     const invite_code = req.params.invite_code;
 
