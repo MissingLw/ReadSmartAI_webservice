@@ -74,7 +74,10 @@ body {
     font-size: medium;
 }
 
-.centered-form form select#accountType,
+.centered-form form select#accountType {
+    margin-top: 20px; /* Adjust this value as needed */
+    margin-bottom: 20px; /* Adjust this value as needed */
+}
 .centered-form form input#name,
 .centered-form form input[type="email"],
 .centered-form form input[type="password"] {
