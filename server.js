@@ -676,6 +676,77 @@ app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {
     });
 });
 
+// Teacher Answers an Assignment
+app.post('/Teacher/classroom/:invite_code/assignment/:id/take_assignment', async (req, res) => {
+    const invite_code = req.params.invite_code;
+    const assignment_id = req.params.id;
+    const teacher_id = req.session.userId;
+    const teacher_answers = req.body;
+
+    // Fetch the questions for the assignment
+    pool.query('SELECT * FROM Question WHERE assignment_id = ?', [assignment_id], (error, questions) => {
+        if (error) {
+            console.error(error);
+            res.status(500).send('An error occurred while fetching the questions.');
+            return;
+        }
+
+        // Create the qa_pairs and teacher_responses dictionaries
+        const qa_pairs = {};
+        const teacher_responses = {};
+        questions.forEach((question, index) => {
+            qa_pairs[index + 1] = question.correct_answer;
+            teacher_responses[index + 1] = teacher_answers[`question_${question.id}`];
+        });
+
+        // Send a POST request to the grading microservice
+        axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/response_grader/grade', { qa_pairs, teacher_responses })
+            .then(async response => {
+                const feedbackList = response.data.feedback;
+
+                let amountCorrect = 0;
+
+                // Update or create TeacherResponse entries
+                for (let i = 0; i < feedbackList.length; i++) {
+                    const feedback = feedbackList[i];
+                    if (feedback.startsWith('Correct:')) {
+                        amountCorrect++;
+                    }
+                    await new Promise((resolve, reject) => {
+                        pool.query(`
+                            INSERT INTO TeacherResponse (teacher_id, assignment_id, question_id, teacher_answer, feedback)
+                            VALUES (?, ?, ?, ?, ?)
+                            ON DUPLICATE KEY UPDATE teacher_answer = VALUES(teacher_answer), feedback = VALUES(feedback)`,
+                            [teacher_id, assignment_id, questions[i].id, teacher_responses[i + 1], feedback], (error, results) => {
+                                if (error) {
+                                    reject(error);
+                                } else {
+                                    resolve(results);
+                                }
+                            });
+                    });
+                }
+
+                let correctnessPercentage = (amountCorrect / feedbackList.length) * 100;
+                correctnessPercentage = parseFloat(correctnessPercentage.toFixed(2)); // Round to 2 decimal places
+
+                // Create a new TeacherCompletedAssignments entry
+                pool.query(`
+                INSERT INTO TeacherCompletedAssignments (teacher_id, assignment_id, correctness_percentage)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE correctness_percentage = VALUES(correctness_percentage), completion_date = CURRENT_TIMESTAMP`,
+                [teacher_id, assignment_id, correctnessPercentage]);
+
+                // Redirect the teacher to the classroom homepage
+                res.redirect(`/Teacher/classroom/${invite_code}/assignment/${assignment_id}/self_feedback`);
+            })
+            .catch(error => {
+                console.error(error);
+                res.status(500).send('An error occurred while grading the assignment.');
+            });
+    });
+});
+
 // Route for Student Assignment Feedback Page
 app.get('/student/classroom/:invite_code/assignment/:id/feedback', (req, res) => {
     const invite_code = req.params.invite_code;
