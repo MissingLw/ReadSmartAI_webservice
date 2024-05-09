@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="/styles.css">
 </head>
 <body>
+    <%- include('partials/student_navbar_in_classroom') %>
     <h1><%= assignment.name %></h1>
 
     <form action="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>" method="POST">
