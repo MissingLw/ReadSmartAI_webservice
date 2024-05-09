@@ -1,6 +1,8 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #DDE0C9; /* Main parts of the page */
+    margin: 0;
+    padding: 0;
 }
 
 .navbar {
@@ -71,5 +73,4 @@ body {
     align-items: center;
     height: 20vh;
     flex-direction: column;
-    height: 10vh; /* Adjust this value as needed */
 }
