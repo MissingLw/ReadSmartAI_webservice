@@ -778,7 +778,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                 };
 
                 // Start the question generation process in the background
-                generateQuestions(jobId, body, result.insertId, invite_code, result.insertId, teacher_id);
+                generateQuestions(jobId, body, result.insertId, invite_code, result.insertId, teacher_id, req.body['see-questions-before'] === 'on');
 
 
                 // Respond with the job ID
@@ -801,9 +801,10 @@ async function generateQuestions(jobId, body, assignmentId, invite_code, assignm
 
         const questions = await axios.post('https://readsmartai-flaskapp-1553808f9b53.herokuapp.com/question_generator/generate', bodyWithTeacherId, {timeout: 300000});
 
-        // Insert each question into the Question table
+        // Insert each question into the Question table or TempQuestion table based on seeQuestionsBefore
+        const tableName = seeQuestionsBefore ? 'TempQuestion' : 'Question';
         for (const qa_pair of questions.data.qa_pairs) {
-            pool.query('INSERT INTO Question (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)', [assignmentId, qa_pair[0], qa_pair[1]], (error, result) => {
+            pool.query(`INSERT INTO ${tableName} (assignment_id, question_text, correct_answer) VALUES (?, ?, ?)`, [assignmentId, qa_pair[0], qa_pair[1]], (error, result) => {
                 if (error) {
                     console.error('Error executing query:', error);
                 }
@@ -836,14 +837,103 @@ app.get('/job/:jobId/status', (req, res) => {
 });
 
 
+app.get('/Teacher/classroom/:invite_code/assignment_create/:id/question_review', (req, res) => {
+    const invite_code = req.params.invite_code;
+    const teacher_id = req.session.userId;
+    const assignment_id = req.params.id;
+
+    pool.query('SELECT * FROM Classroom WHERE invite_code = ?', [invite_code], (error, classrooms) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to fetch the classroom data.');
+            return;
+        }
+
+        if (classrooms.length > 0 && classrooms[0].teacher_id === teacher_id) {
+            // Fetch the questions from the TempQuestion table
+            pool.query('SELECT * FROM TempQuestion WHERE assignment_id = ?', [assignment_id], (error, questions) => {
+                if (error) {
+                    console.error('Error executing query:', error);
+                    res.status(500).send('An error occurred while trying to fetch the questions.');
+                    return;
+                }
+
+                // Render the review_questions.ejs page with the questions
+                res.render('review_questions', { questions });
+            });
+        } else {
+            req.flash('error', 'You are not the teacher of this classroom.');
+            res.redirect('/Teacher/homepage');
+        }
+    });
+});
 
 
+app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/edit', (req, res) => {
+    const { questionId, updatedQuestion, updatedAnswer } = req.body;
 
+    pool.query('UPDATE TempQuestion SET question_text = ?, correct_answer = ? WHERE id = ?', [updatedQuestion, updatedAnswer, questionId], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to update the question.');
+            return;
+        }
 
+        res.status(200).send('Question updated successfully.');
+    });
+});
 
+app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/delete', (req, res) => {
+    const { questionId } = req.body;
 
+    pool.query('DELETE FROM TempQuestion WHERE id = ?', [questionId], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to delete the question.');
+            return;
+        }
 
+        res.status(200).send('Question deleted successfully.');
+    });
+});
 
+app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/add', (req, res) => {
+    const { newQuestion, newAnswer } = req.body;
+    const assignment_id = req.params.id;
+
+    pool.query('INSERT INTO TempQuestion (question_text, correct_answer, assignment_id) VALUES (?, ?, ?)', [newQuestion, newAnswer, assignment_id], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to add the question.');
+            return;
+        }
+
+        res.status(200).send('Question added successfully.');
+    });
+});
+
+app.post('/Teacher/classroom/:invite_code/assignment_create/:id/question_review/finalize', (req, res) => {
+    const assignment_id = req.params.id;
+    const invite_code = req.params.invite_code;
+
+    pool.query('INSERT INTO Question (question_text, correct_answer, assignment_id) SELECT question_text, correct_answer, assignment_id FROM TempQuestion WHERE assignment_id = ?', [assignment_id], (error, results) => {
+        if (error) {
+            console.error('Error executing query:', error);
+            res.status(500).send('An error occurred while trying to finalize the questions.');
+            return;
+        }
+
+        pool.query('DELETE FROM TempQuestion WHERE assignment_id = ?', [assignment_id], (error, results) => {
+            if (error) {
+                console.error('Error executing query:', error);
+                res.status(500).send('An error occurred while trying to finalize the questions.');
+                return;
+            }
+
+            res.redirect(`/Teacher/classroom/${invite_code}/assignment/${assignment_id}`);
+        });
+    });
+});
 
 
 

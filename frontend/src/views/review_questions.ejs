@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Review Questions</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/teacher_navbar_in_classroom') %>
+    <h1>Review Questions</h1>
+    <ul>
+        <% questions.forEach((question) => { %>
+            <li>
+                <p><strong>Question:</strong> <%= question.question_text %></p>
+                <p><strong>Answer:</strong> <%= question.correct_answer %></p>
+                <button>Edit</button>
+                <button>Delete</button>
+            </li>
+        <% }); %>
+    </ul>
+    <button>Add New Question</button>
+    <button>Finalize</button>
+</body>
+</html>

@@ -45,6 +45,10 @@
             <label for="end-page">PDFS ONLY - End Page:</label>
             <input type="number" id="end-page" name="end-page" min="1" value="1" required>
         </div>
+        <div>
+            <input type="checkbox" id="see-questions-before" name="see-questions-before">
+            <label for="see-questions-before">See questions before finalizing</label>
+        </div>
         <input type="submit" value="Submit">
     </form>
     <button onclick="location.href='/Teacher/text_sources/add_new_text_source'" class="add-source-button">TODO Add new text source</button>
@@ -79,8 +83,12 @@
                                 // Enable the submit button and hide the loading spinner
                                 $('input[type="submit"]').prop('disabled', false);
                                 $('#loading').hide();
-            
-                                window.location.href = data.result; // Redirect to the result
+
+                                if ($('#see-questions-before').is(':checked')) {
+                                    window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/question_review' + jobId;
+                                } else {
+                                    window.location.href = data.result;
+                                }
                             } else if (data.status === 'error') {
                                 clearInterval(intervalId); // Stop checking the status
             
