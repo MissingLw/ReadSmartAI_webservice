@@ -8,6 +8,7 @@
     <%- include('partials/teacher_navbar_in_classroom') %>
     <h1><%= assignment.name %> - Student Results</h1>
     <button onclick="location.href='/Teacher/classroom/<%= classroom.invite_code %>'">Back to Classroom</button>
+    <button onclick="location.href='/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/take_assignment'">Take Assignment</button>
     <div class="student-container">
         <% students.forEach(student => { %>
             <div class="student">
