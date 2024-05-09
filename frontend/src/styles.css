@@ -65,7 +65,7 @@ body {
 }
 
 .centered-form {
-    padding-top: 40px; /* Add padding at the top */
+    padding-top: 60px; /* Add padding at the top */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -75,7 +75,6 @@ body {
 }
 
 .centered-form form select#accountType {
-    margin-top: 20px; /* Adjust this value as needed */
     margin-bottom: 20px; /* Adjust this value as needed */
 }
 .centered-form form input#name,
