@@ -85,7 +85,7 @@
                                 $('#loading').hide();
 
                                 if ($('#see-questions-before').is(':checked')) {
-                                    window.location.href = '/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/question_review' + jobId;
+                                    window.location.href = data.result + '/question_review';
                                 } else {
                                     window.location.href = data.result;
                                 }
