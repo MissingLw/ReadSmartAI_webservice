@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignment</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/teacher_navbar_in_classroom') %>
+    <h1><%= assignment.name %></h1>
+
+    <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/take_assignment" method="POST">
+        <% questions.forEach((question, index) => { %>
+            <div>
+                <p>Question <%= index + 1 %>. <%= question.question_text %></p>
+                <input type="text" id="question_<%= index %>" name="question_<%= question.id %>" required>
+            </div>
+        <% }); %>
+        <button type="submit">Submit Assignment</button>
+    </form>
+</body>
+</html>

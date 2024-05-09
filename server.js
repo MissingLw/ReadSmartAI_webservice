@@ -568,6 +568,42 @@ app.get('/student/classroom/:invite_code/assignment/:id', (req, res) => {
     );
 });
 
+// Route for Teacher Assignment Page
+app.get('/Teacher/classroom/:invite_code/assignment/:id/take_assignment', (req, res) => {
+    const invite_code = req.params.invite_code;
+    const assignment_id = req.params.id;
+    const teacher_id = req.session.userId;
+
+    // Check if the teacher and assignment belong to the classroom
+    pool.query(`
+        SELECT * 
+        FROM Classroom 
+        JOIN ClassroomTeacher ON Classroom.id = ClassroomTeacher.classroom_id 
+        JOIN Assignment ON Classroom.id = Assignment.classroom_id 
+        WHERE Classroom.invite_code = ? 
+        AND ClassroomTeacher.teacher_id = ? 
+        AND Assignment.id = ?`, 
+        [invite_code, teacher_id, assignment_id], 
+        (error, results) => {
+            if (error) throw error;
+            if (results.length > 0) {
+                const classroom = results[0];
+
+                // Fetch the questions for the assignment
+                pool.query('SELECT * FROM Question WHERE assignment_id = ?', [assignment_id], (error, questions) => {
+                    if (error) throw error;
+
+                    // Render the assignment page with the assignment and questions data
+                    res.render('teacher_take_assignment', { classroom, assignment: results[0], questions });
+                });
+            } else {
+                // The teacher or assignment does not belong to the classroom, redirect to the teacher homepage
+                res.redirect('/Teacher/homepage');
+            }
+        }
+    );
+});
+
 
 // Student Answers an assignment
 app.post('/student/classroom/:invite_code/assignment/:id', async (req, res) => {

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Assignment Feedback</title>
+    <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+    <%- include('partials/teacher_navbar_in_classroom') %>
+    <h1><%= assignment.name %></h1>
+    <h2>Correctness Percentage: <%= correctnessPercentage %> %</h2>
+    <h2>Date Completed: <%= completionDate %></h2>
+
+    <ol>
+        <% questions.forEach((question, index) => { %>
+            <li>
+                <h3>Question <%= index + 1 %>: <%= question.question_text %></h3>
+                <p>Your Response: <%= question.student_answer %></p>
+                <p>Feedback: <%= question.feedback %></p>
+            </li>
+        <% }); %>
+    </ol>
+
+    <button onclick="location.href='/Teacher/classroom/<%= classroom.invite_code %>'">Return to classroom homepage</button>
+    <button onclick="location.href='/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>'">Retake Assignment</button>
+</body>
+</html>
