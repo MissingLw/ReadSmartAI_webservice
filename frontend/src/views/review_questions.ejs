@@ -3,21 +3,24 @@
 <head>
     <title>Review Questions</title>
     <link rel="stylesheet" type="text/css" href="/styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 </head>
 <body>
     <%- include('partials/teacher_navbar_in_classroom') %>
     <h1>Review Questions</h1>
-    <ul>
-        <% questions.forEach((question) => { %>
-            <li>
-                <p><strong>Question:</strong> <%= question.question_text %></p>
-                <p><strong>Answer:</strong> <%= question.correct_answer %></p>
-                <button>Edit</button>
-                <button>Delete</button>
+    <ul id="questions-list">
+        <% questions.forEach((question, index) => { %>
+            <li id="question-<%= index %>">
+                <p><strong>Question:</strong> <span class="question-text"><%= question.question_text %></span></p>
+                <p><strong>Answer:</strong> <span class="question-answer"><%= question.correct_answer %></span></p>
+                <button class="edit-button" data-question-id="<%= question.id %>">Edit</button>
+                <button class="delete-button" data-question-id="<%= question.id %>">Delete</button>
             </li>
         <% }); %>
     </ul>
-    <button>Add New Question</button>
-    <button>Finalize</button>
+    <button id="add-button">Add New Question</button>
+    <button id="finalize-button">Finalize</button>
+
+    <script src="/review_questions.js"></script>
 </body>
 </html>
