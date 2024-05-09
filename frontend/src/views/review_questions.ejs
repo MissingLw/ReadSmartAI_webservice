@@ -51,8 +51,12 @@
         });
 
         $('#finalize-button').click(function() {
-            $.post(`/Teacher/classroom/<%= classroom.invite_code %>/assignment/<%= assignment_id %>/question_review/finalize`, function(data) {
-                location.reload();
+            $.ajax({
+                url: `/Teacher/classroom/<%= classroom.invite_code %>/assignment_create/<%= assignment_id %>/question_review/finalize`,
+                type: 'POST',
+                success: function(data) {
+                    window.location.href = data;
+                }
             });
         });
     });

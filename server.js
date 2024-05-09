@@ -930,7 +930,7 @@ app.post('/Teacher/classroom/:invite_code/assignment/:id/question_review/finaliz
                 return;
             }
 
-            res.redirect(`/Teacher/classroom/${invite_code}/assignment/${assignment_id}`);
+            res.send(`/Teacher/classroom/${invite_code}/assignment/${assignment_id}`);
         });
     });
 });
