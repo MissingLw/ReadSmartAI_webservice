@@ -773,7 +773,8 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
                     'question-count': req.body['question-count'],
                     'start-page': req.body['start-page'],
                     'end-page': req.body['end-page'],
-                    'use-raw-text': req.body['use-raw-text'] === 'on'
+                    'use-raw-text': req.body['use-raw-text'] === 'on',
+                    'raw-text': req.body['raw-text']
                 };
 
                 // Start the question generation process in the background
