@@ -10,6 +10,7 @@
     </style>
 </head>
 <body>
+    <%- include('partials/teacher_navbar') %>
     <h1>Welcome, <%= user.name %>!</h1>
     <button onclick="location.href='/classroom/join'">TODO Join a Classroom</button>
     <button onclick="location.href='/Teacher/Classroom/Create'">Create a Classroom</button>
