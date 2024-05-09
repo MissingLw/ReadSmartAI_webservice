@@ -78,7 +78,11 @@ body {
     align-items: center;
 }
 
-.centered-form input[type="email"],
-.centered-form input[type="password"] {
-    margin-bottom: 20px; /* Adjust this value as needed */
+.centered-form form input[type="submit"] {
+    align-self: center; /* Center the button */
+}
+
+.centered-form form input[type="email"]:last-child,
+.centered-form form input[type="password"]:last-child {
+    margin-bottom: 20px !important; /* Add space below the input fields */
 }
