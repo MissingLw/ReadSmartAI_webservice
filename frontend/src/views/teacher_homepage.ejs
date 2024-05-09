@@ -6,13 +6,17 @@
         .classrooms {
             height: 200px;
             overflow-y: scroll;
+            outline: 2px solid #000; /* Add an outline */
+            width: 100%; /* Make it go across the entire screen */
+            padding: 0 20px; /* Add padding on the sides */
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+            margin-top: 20px; /* Add margin at the top */
         }
     </style>
 </head>
 <body>
     <%- include('partials/teacher_navbar') %>
     <h1>Welcome, <%= user.name %>!</h1>
-    <button onclick="location.href='/classroom/join'">TODO Join a Classroom</button>
     <button onclick="location.href='/Teacher/Classroom/Create'">Create a Classroom</button>
     <button onclick="location.href='/Teacher/text_sources/'">View Uploaded Text Sources</button>
     <h2>Select Classroom</h2>
