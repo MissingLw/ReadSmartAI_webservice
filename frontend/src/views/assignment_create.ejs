@@ -11,6 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> <!-- Add this line to include jQuery -->
 </head>
 <body>
+    <div id="loading" style="display: none;">Loading...</div>
     <h1>Question Generator</h1>
     <form id="assignment-form"> <!-- Add an ID to the form -->
     <form action="/Teacher/classroom/<%= classroom.invite_code %>/assignment_create" method="POST">
@@ -60,10 +61,14 @@
             });
             $('#assignment-form').submit(function(event) {
                 event.preventDefault(); // Prevent the default form submission
-
+            
+                // Disable the submit button and show the loading spinner
+                $('input[type="submit"]').prop('disabled', true);
+                $('#loading').show();
+            
                 $.post('/Teacher/classroom/<%= classroom.invite_code %>/assignment_create', $(this).serialize(), function(data) {
                     const jobId = data.jobId;
-
+            
                     // Check the status of the job every second
                     const intervalId = setInterval(function() {
                         $.get('/job/' + jobId + '/status', function(data) {
@@ -74,6 +79,10 @@
                                 clearInterval(intervalId); // Stop checking the status
                                 alert('An error occurred while generating the questions.');
                             }
+            
+                            // Enable the submit button and hide the loading spinner
+                            $('input[type="submit"]').prop('disabled', false);
+                            $('#loading').hide();
                         });
                     }, 1000);
                 });
