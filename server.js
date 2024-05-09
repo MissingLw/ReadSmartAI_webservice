@@ -792,7 +792,7 @@ app.post('/Teacher/classroom/:invite_code/assignment_create', async (req, res) =
 });
 
 // A function to generate questions in the background
-async function generateQuestions(jobId, body, assignmentId, invite_code, assignmentInsertId, teacher_id) {
+async function generateQuestions(jobId, body, assignmentId, invite_code, assignmentInsertId, teacher_id, seeQuestionsBefore) {
     try {
         const bodyWithTeacherId = {
             ...body,
