@@ -15,7 +15,7 @@ body {
 
 .navbar a {
     text-decoration: none;
-    color: white; /* Change this to the color you want for the text */
+    color: #949B79; /* Change this to the color you want for the text */
     background-color: #DDE0C9; /* Change this to the color you want for the button */
     padding: 10px 20px; /* Add some padding around the text */
     /* margin-left: 10px; /* Add some space between the buttons */
