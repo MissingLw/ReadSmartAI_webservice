@@ -9,28 +9,34 @@
     <h1><%= classroom.name %></h1>
     <h2>Teacher: <%= teacher.name %></h2>
 
-    <h3>Assignments To Complete:</h3>
-    <ul>
-        <% notCompleted.forEach((assignment) => { %>
-            <li>
-                <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>">
-                    <%= assignment.name %>
-                </a>
-            </li>
-        <% }); %>
-    </ul>
+    <div class="container">
+        <div class="assignments-section">
+            <h3>Assignments To Complete:</h3>
+            <ul>
+                <% notCompleted.forEach((assignment) => { %>
+                    <li>
+                        <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>">
+                            <%= assignment.name %>
+                        </a>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
 
-    <h3>Completed Assignments:</h3>
-    <ul>
-        <% completed.forEach((assignment) => { %>
-            <li>
-                <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/feedback">
-                    <%= assignment.name %>
-                </a>
-                <p>Correctness Percentage: <%= assignment.correctness_percentage %></p>
-                <p>Completion Date: <%= assignment.completion_date %></p>
-            </li>
-        <% }); %>
-    </ul>
+        <div class="assignments-section">
+            <h3>Completed Assignments:</h3>
+            <ul>
+                <% completed.forEach((assignment) => { %>
+                    <li>
+                        <a href="/student/classroom/<%= classroom.invite_code %>/assignment/<%= assignment.id %>/feedback">
+                            <%= assignment.name %>
+                        </a>
+                        <p>Correctness Percentage: <%= assignment.correctness_percentage %></p>
+                        <p>Completion Date: <%= assignment.completion_date %></p>
+                    </li>
+                <% }); %>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>
